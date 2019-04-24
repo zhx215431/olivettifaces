@@ -59,7 +59,7 @@ h_softmax = tf.nn.softmax(h_add_fc2,name='h_softmax')
 cross_entropy = -tf.reduce_sum(y_*tf.log(tf.clip_by_value(h_softmax,1e-8,1.0)),name='cross_entropy')
 
 '''train'''
-train_step = tf.train.AdamOptimizer(0.05).minimize(cross_entropy)
+train_step = tf.train.AdamOptimizer(1e-4).minimize(cross_entropy)
 correct_prediction = tf.equal(tf.argmax(h_softmax,1), tf.argmax(y_,1))
 accuracy = tf.reduce_mean(tf.cast(correct_prediction, "float"))
 
@@ -68,13 +68,12 @@ sess.run(tf.global_variables_initializer())
 sess = tfdbg.LocalCLIDebugWrapperSession(sess)
 
 for i in range(30000):
-    print("start!!!!!!!!!!!!!!")
     batch_x,batch_y = bulider.next_batch_image(40)
-    input()
-    if i%1 == 0:
+    if i%10 == 0:
         train_cross_entropy = cross_entropy.eval(feed_dict={x:batch_x,y_:batch_y})
         print("step %d, cross entropy: %g"%(i, train_cross_entropy))
-        #print(x_y_neighborhoodDiff.eval(feed_dict={x1:base, x2:target, y_:is_same}))
+        train_accuracy = accuracy.eval(feed_dict={x:batch_x,y_:batch_y})
+        print("training accuracy %g"%(train_accuracy))
     train_step.run(feed_dict={x:batch_x,y_:batch_y})
 
 
